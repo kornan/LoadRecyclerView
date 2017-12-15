@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">LoadRecyclerView</string>
-    <string name="recycle_load_more">加载更多</string>
-    <string name="recycle_loading">加载中...</string>
-    <string name="recycle_no_more">没有更多了</string>
-    <string name="recycle_load_failure">加载失败,点击重试</string>
+    <string name="recycle_load_more">Load more</string>
+    <string name="recycle_loading">Loading...</string>
+    <string name="recycle_no_more">No more</string>
+    <string name="recycle_load_failure">Load failed, click retry</string>
 </resources>
