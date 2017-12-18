@@ -1,6 +1,7 @@
 package com.flobberworm.load;
 
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -103,6 +104,13 @@ public class LoadStatusAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
         if (position >= adapter.getItemCount()) {
             LoadViewHolder loadViewHolder = (LoadViewHolder) holder;
             loadViewHolder.setStatus(status);
+
+            ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
+            if (layoutParams instanceof StaggeredGridLayoutManager.LayoutParams) {
+                StaggeredGridLayoutManager.LayoutParams staggeredGridLayoutParams = (StaggeredGridLayoutManager.LayoutParams) layoutParams;
+                staggeredGridLayoutParams.setFullSpan(true);
+            }
+
         } else {
             adapter.onBindViewHolder(holder, position);
         }
