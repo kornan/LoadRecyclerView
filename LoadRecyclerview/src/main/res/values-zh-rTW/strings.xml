@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">LoadRecyclerView</string>
     <string name="recycle_load_more">加載更多</string>
     <string name="recycle_loading">加載中...</string>
     <string name="recycle_no_more">沒有更多了</string>

@@ -49,23 +49,16 @@ public class GridLayoutActivity extends AppCompatActivity implements SwipeRefres
 
     private void initViews() {
         requestData();
+        swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setRefreshing(true);
 
         GridAdapter adapter = new GridAdapter(this, dataList);
-
-        swipeRefreshLayout.setOnRefreshListener(this);
         gridLayoutManager = new GridLayoutManager(this, 3);
-        recyclerView.setLayoutManager(gridLayoutManager);
         RecyclerManager recyclerManager = new RecyclerManager(recyclerView);
+        recyclerManager.setLayoutManager(gridLayoutManager);
         recyclerManager.setLoadStatusAdapter(adapter);
         recyclerManager.setOnItemClickListener(this);
         recyclerManager.setOnLoadMoreListener(this);
-        gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-            @Override
-            public int getSpanSize(int position) {
-                return loadStatusAdapter.getItemViewType(position) == ITEM_TYPE_LOAD_MORE ? gridLayoutManager.getSpanCount() : 1;
-            }
-        });
         loadStatusAdapter = recyclerManager.getLoadStatusAdapter();
         loadStatusAdapter.setStatus(LoadStatusAdapter.Status.STATUS_LOADING);
     }

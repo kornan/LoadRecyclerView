@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.flobberworm.load.LoadStatusAdapter.Status.STATUS_LOADING;
+import static com.flobberworm.load.LoadStatusAdapter.Status.STATUS_LOAD_FAILURE;
+import static com.flobberworm.load.LoadStatusAdapter.Status.STATUS_NO_MORE;
 
 public class LinearLayoutActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener, DataAsyncTask.OnDataEvent, OnLoadMoreListener, ItemClickSupport.OnItemClickListener {
     private Toolbar toolbar;
@@ -60,7 +62,7 @@ public class LinearLayoutActivity extends AppCompatActivity implements SwipeRefr
         recyclerManager.setOnLoadMoreListener(this);
 
         loadStatusAdapter = recyclerManager.getLoadStatusAdapter();
-        loadStatusAdapter.setStatus(LoadStatusAdapter.Status.STATUS_LOADING);
+
     }
 
     @Override
@@ -72,9 +74,9 @@ public class LinearLayoutActivity extends AppCompatActivity implements SwipeRefr
 
     @Override
     public void onLoadMore() {
-//        if (swipeRefreshLayout.isRefreshing()) {
-//            return;
-//        }
+        if (loadStatusAdapter.getStatus() == STATUS_LOAD_FAILURE || loadStatusAdapter.getStatus() == STATUS_NO_MORE) {
+            return;
+        }
         requestData();
     }
 
@@ -89,10 +91,17 @@ public class LinearLayoutActivity extends AppCompatActivity implements SwipeRefr
 
     @Override
     public void complete(List<String> data) {
+        if (swipeRefreshLayout.isRefreshing()) {
+            swipeRefreshLayout.setRefreshing(false);
+            dataList.clear();
+            loadStatusAdapter.notifyDataSetChanged();
+        }
         int start = dataList.size();
         dataList.addAll(data);
         loadStatusAdapter.notifyItemRangeInserted(start, data.size());
+        loadStatusAdapter.setStatus(LoadStatusAdapter.Status.STATUS_LOAD_FAILURE);
+        loadStatusAdapter.notifyStatusChanged();
 
-        swipeRefreshLayout.setRefreshing(false);
+
     }
 }

@@ -7,6 +7,8 @@ import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 
+import static com.flobberworm.load.LoadStatusAdapter.ITEM_TYPE_LOAD_MORE;
+
 /**
  * RecyclerView Manager
  * Created by Kornan on 2017/11/14.
@@ -59,6 +61,23 @@ public final class RecyclerManager {
     public void setLoadStatusAdapter(RecyclerView.Adapter adapter) {
         this.loadStatusAdapter = new LoadStatusAdapter(adapter);
         this.recyclerView.setAdapter(loadStatusAdapter);
+
+    }
+
+    /**
+     * @param layoutManager
+     */
+    public void setLayoutManager(RecyclerView.LayoutManager layoutManager) {
+        if (layoutManager instanceof GridLayoutManager) {
+            final GridLayoutManager gridLayoutManager = (GridLayoutManager) layoutManager;
+            gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    return loadStatusAdapter.getItemViewType(position) == ITEM_TYPE_LOAD_MORE ? gridLayoutManager.getSpanCount() : 1;
+                }
+            });
+        }
+        recyclerView.setLayoutManager(layoutManager);
     }
 
     public void setLoadStatusAdapter(LoadStatusAdapter loadStatusAdapter) {
