@@ -22,7 +22,7 @@ public class LoadViewHolder extends RecyclerView.ViewHolder {
     public LoadViewHolder(View itemView) {
         super(itemView);
         progressBar = itemView.findViewById(R.id.progress);
-        tvLoading = itemView.findViewById(R.id.viewStub);
+        tvLoading = itemView.findViewById(R.id.tv_loading);
         setStatus(STATUS_LOADING);
     }
 
