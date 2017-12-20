@@ -39,7 +39,7 @@ publish {
     userOrg = 'kornan'
     groupId = 'com.flobberworm'
     artifactId = 'LoadRecyclerView'
-    publishVersion = '0.2.0'
+    publishVersion = '0.2.1'
     desc = 'RecyclerView Load'
     website = 'https://github.com/kornan/LoadRecyclerView'
 }
