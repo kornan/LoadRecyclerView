@@ -6,6 +6,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.flobberworm.sample.R;
+import com.flobberworm.sample.SampleBean;
 
 import java.util.Random;
 
@@ -23,18 +24,9 @@ public class StaggeredViewHolder extends RecyclerView.ViewHolder {
         ivIcon = itemView.findViewById(R.id.ivIcon);
     }
 
-    public void bind(String str) {
-        tvContent.setText(str);
-        Random random = new Random(System.currentTimeMillis());
-        if (random.nextInt() % 2 == 0) {
-            ivIcon.setImageResource(R.mipmap.a);
-        }
-//        else if (random.nextInt() % 2 == 1) {
-//            ivIcon.setImageResource(R.mipmap.b);
-//        }
-        else {
-            ivIcon.setImageResource(R.mipmap.c);
-        }
+    public void bind(SampleBean bean) {
+        tvContent.setText(bean.title);
+        ivIcon.setImageResource(bean.rid);
 
     }
 }

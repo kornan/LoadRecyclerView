@@ -1,12 +1,8 @@
 package com.flobberworm.sample;
 
-import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
+import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
@@ -23,7 +19,6 @@ import com.flobberworm.sample.adapter.LinearAdapter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.flobberworm.load.LoadStatusAdapter.Status.STATUS_LOADING;
 import static com.flobberworm.load.LoadStatusAdapter.Status.STATUS_LOAD_FAILURE;
 import static com.flobberworm.load.LoadStatusAdapter.Status.STATUS_NO_MORE;
 
@@ -32,7 +27,9 @@ public class LinearLayoutActivity extends AppCompatActivity implements SwipeRefr
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private List<String> dataList;
-    private LoadStatusAdapter loadStatusAdapter;
+    //    private LoadStatusAdapter loadStatusAdapter;
+    private RecyclerManager recyclerManager;
+    private LinearAdapter linearAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,16 +49,14 @@ public class LinearLayoutActivity extends AppCompatActivity implements SwipeRefr
         requestData();
         swipeRefreshLayout.setRefreshing(true);
 
-        LinearAdapter linearAdapter = new LinearAdapter(this, dataList);
+        linearAdapter = new LinearAdapter(this, dataList);
         swipeRefreshLayout.setOnRefreshListener(this);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        RecyclerManager recyclerManager = new RecyclerManager(recyclerView);
-        recyclerManager.setLoadStatusAdapter(linearAdapter);
+        recyclerManager = new RecyclerManager(recyclerView);
+        recyclerManager.setAdapter(linearAdapter);
         recyclerManager.setOnItemClickListener(this);
         recyclerManager.setOnLoadMoreListener(this);
-
-        loadStatusAdapter = recyclerManager.getLoadStatusAdapter();
 
     }
 
@@ -69,12 +64,20 @@ public class LinearLayoutActivity extends AppCompatActivity implements SwipeRefr
     public void onItemClicked(RecyclerView recyclerView, int position, View v) {
         if (position < dataList.size()) {
             Toast.makeText(getBaseContext(), dataList.get(position), Toast.LENGTH_SHORT).show();
+        } else if (position == dataList.size()) {
+            if (recyclerManager.isFailureStatus()) {
+                Log.w("fw", "onItemClicked isFailureStatus");
+                recyclerManager.setStatus(LoadStatusAdapter.Status.STATUS_LOADING);
+//                recyclerManager.notifyStatusChanged();
+                recyclerManager.notifyDataSetChanged();
+                requestData();
+            }
         }
     }
 
     @Override
     public void onLoadMore() {
-        if (loadStatusAdapter.getStatus() == STATUS_LOAD_FAILURE || loadStatusAdapter.getStatus() == STATUS_NO_MORE) {
+        if (recyclerManager.isFailureStatus() || recyclerManager.isNoMoreStatus()) {
             return;
         }
         requestData();
@@ -93,15 +96,13 @@ public class LinearLayoutActivity extends AppCompatActivity implements SwipeRefr
     public void complete(List<String> data) {
         if (swipeRefreshLayout.isRefreshing()) {
             swipeRefreshLayout.setRefreshing(false);
-            dataList.clear();
-            loadStatusAdapter.notifyDataSetChanged();
+            dataList = new ArrayList<>();
+            linearAdapter.setDataList(dataList);
+            recyclerManager.notifyDataSetChanged();
         }
         int start = dataList.size();
         dataList.addAll(data);
-        loadStatusAdapter.notifyItemRangeInserted(start, data.size());
-        loadStatusAdapter.setStatus(LoadStatusAdapter.Status.STATUS_LOAD_FAILURE);
-        loadStatusAdapter.notifyStatusChanged();
-
-
+        recyclerManager.setStatus(LoadStatusAdapter.Status.STATUS_LOAD_FAILURE);
+        recyclerManager.notifyItemRangeInserted(start, data.size());
     }
 }

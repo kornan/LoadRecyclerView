@@ -14,7 +14,7 @@ import static com.flobberworm.load.LoadStatusAdapter.ITEM_TYPE_LOAD_MORE;
  * Created by Kornan on 2017/11/14.
  */
 
-public final class RecyclerManager {
+public final class RecyclerManager implements IRecyclerManager, ILoadStatus {
 
     private RecyclerView recyclerView;
     private LayoutInflater mInflater;
@@ -40,78 +40,23 @@ public final class RecyclerManager {
     public RecyclerManager(RecyclerView recyclerView) {
         this.recyclerView = recyclerView;
         this.mInflater = LayoutInflater.from(recyclerView.getContext());
-        initFooter();
-        initLoadMore();
-    }
-
-    public void init() {
-        this.mInflater = LayoutInflater.from(recyclerView.getContext());
-        initFooter();
-        initLoadMore();
-    }
-
-    public RecyclerView getRecyclerView() {
-        return recyclerView;
-    }
-
-    public void setRecyclerView(RecyclerView recyclerView) {
-        this.recyclerView = recyclerView;
-    }
-
-    public void setLoadStatusAdapter(RecyclerView.Adapter adapter) {
-        this.loadStatusAdapter = new LoadStatusAdapter(adapter);
-        this.recyclerView.setAdapter(loadStatusAdapter);
-
-    }
-
-    /**
-     * @param layoutManager
-     */
-    public void setLayoutManager(RecyclerView.LayoutManager layoutManager) {
-        if (layoutManager instanceof GridLayoutManager) {
-            final GridLayoutManager gridLayoutManager = (GridLayoutManager) layoutManager;
-            gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
-                @Override
-                public int getSpanSize(int position) {
-                    return loadStatusAdapter.getItemViewType(position) == ITEM_TYPE_LOAD_MORE ? gridLayoutManager.getSpanCount() : 1;
-                }
-            });
-        }
-        recyclerView.setLayoutManager(layoutManager);
-    }
-
-    public void setLoadStatusAdapter(LoadStatusAdapter loadStatusAdapter) {
-        this.loadStatusAdapter = loadStatusAdapter;
-        this.recyclerView.setAdapter(loadStatusAdapter);
-    }
-
-    public LoadStatusAdapter getLoadStatusAdapter() {
-        return loadStatusAdapter;
-    }
-
-    /**
-     * setOnItemClickListener
-     *
-     * @param onItemClickListener ItemClickSupport.OnItemClickListener
-     */
-    public void setOnItemClickListener(ItemClickSupport.OnItemClickListener onItemClickListener) {
-        ItemClickSupport.addTo(recyclerView)
-                .setOnItemClickListener(onItemClickListener);
+        setDefaultFooterView();
+        setLoadMore();
     }
 
     /**
      * config footer
      */
-    private void initFooter() {
+    private void setDefaultFooterView() {
         //default footerView
-        footerView = mInflater.inflate(R.layout.item_refresh_bottom, null);
+        footerView = mInflater.inflate(R.layout.item_load_default_fw, null);
     }
 
     /**
      * config load more
      */
-    private void initLoadMore() {
-        layoutManager = recyclerView.getLayoutManager();
+    private void setLoadMore() {
+//        layoutManager = recyclerView.getLayoutManager();
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
@@ -172,21 +117,163 @@ public final class RecyclerManager {
 
     }
 
+    public RecyclerView getRecyclerView() {
+        return recyclerView;
+    }
+
+    public void setRecyclerView(RecyclerView recyclerView) {
+        this.recyclerView = recyclerView;
+    }
+
+    public LoadStatusAdapter getLoadStatusAdapter() {
+        return loadStatusAdapter;
+    }
+
+    /**
+     * @param layoutManager RecyclerView.LayoutManager
+     */
+    @Override
+    public void setLayoutManager(RecyclerView.LayoutManager layoutManager) {
+        this.layoutManager = layoutManager;
+        if (layoutManager instanceof GridLayoutManager) {
+            final GridLayoutManager gridLayoutManager = (GridLayoutManager) layoutManager;
+            gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    return loadStatusAdapter.getItemViewType(position) == ITEM_TYPE_LOAD_MORE ? gridLayoutManager.getSpanCount() : 1;
+                }
+            });
+        }
+        recyclerView.setLayoutManager(layoutManager);
+    }
+
+    @Override
+    public void setAdapter(RecyclerView.Adapter adapter) {
+//        if (adapter instanceof LoadStatusAdapter) {
+//            this.loadStatusAdapter = (LoadStatusAdapter) adapter;
+//        } else {
+        this.loadStatusAdapter = new LoadStatusAdapter(adapter);
+//        }
+        this.recyclerView.setAdapter(loadStatusAdapter);
+    }
+
+    public void setAdapter(LoadStatusAdapter adapter) {
+        this.loadStatusAdapter = adapter;
+        this.recyclerView.setAdapter(loadStatusAdapter);
+    }
+
+    /**
+     * setOnItemClickListener
+     *
+     * @param onItemClickListener ItemClickSupport.OnItemClickListener
+     */
+    @Override
+    public void setOnItemClickListener(ItemClickSupport.OnItemClickListener onItemClickListener) {
+        ItemClickSupport.addTo(recyclerView).setOnItemClickListener(onItemClickListener);
+    }
+
+    @Override
+    public void setOnItemLongClickListener(ItemClickSupport.OnItemLongClickListener onItemLongClickListener) {
+        ItemClickSupport.addTo(recyclerView).setOnItemLongClickListener(onItemLongClickListener);
+    }
+
     /**
      * set bottom loading listener
      *
      * @param onLoadMoreListener
      */
+    @Override
     public void setOnLoadMoreListener(OnLoadMoreListener onLoadMoreListener) {
         this.onLoadMoreListener = onLoadMoreListener;
     }
 
     /**
-     * add footer view
+     * set footer view
      *
      * @param view
      */
-    public void addFooterView(View view) {
+    @Override
+    public void setFooterView(View view) {
         this.footerView = view;
+    }
+
+    @Override
+    public void setStatus(LoadStatusAdapter.Status status) {
+        loadStatusAdapter.setStatus(status);
+    }
+
+    @Override
+    public boolean isLoading() {
+        return loadStatusAdapter.getStatus() == LoadStatusAdapter.Status.STATUS_LOADING;
+    }
+
+    @Override
+    public boolean isHideStatus() {
+        return loadStatusAdapter.getStatus() == LoadStatusAdapter.Status.STATUS_LOAD_HIDE;
+    }
+
+    @Override
+    public boolean isNoMoreStatus() {
+        return loadStatusAdapter.getStatus() == LoadStatusAdapter.Status.STATUS_NO_MORE;
+    }
+
+    @Override
+    public boolean isFailureStatus() {
+        return loadStatusAdapter.getStatus() == LoadStatusAdapter.Status.STATUS_LOAD_FAILURE;
+    }
+
+    @Override
+    public void notifyStatusChanged() {
+        loadStatusAdapter.notifyStatusChanged();
+    }
+
+    @Override
+    public void notifyDataSetChanged() {
+        loadStatusAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    public void notifyItemChanged(int position) {
+        loadStatusAdapter.notifyItemChanged(position);
+    }
+
+    @Override
+    public void notifyItemChanged(int position, Object payload) {
+        loadStatusAdapter.notifyItemChanged(position, payload);
+    }
+
+    @Override
+    public void notifyItemRangeChanged(int positionStart, int itemCount) {
+        loadStatusAdapter.notifyItemRangeChanged(positionStart, itemCount);
+    }
+
+    @Override
+    public void notifyItemRangeChanged(int positionStart, int itemCount, Object payload) {
+        loadStatusAdapter.notifyItemRangeChanged(positionStart, itemCount, payload);
+    }
+
+    @Override
+    public void notifyItemInserted(int position) {
+        loadStatusAdapter.notifyItemInserted(position);
+    }
+
+    @Override
+    public void notifyItemMoved(int fromPosition, int toPosition) {
+        loadStatusAdapter.notifyItemMoved(fromPosition, toPosition);
+    }
+
+    @Override
+    public void notifyItemRangeInserted(int positionStart, int itemCount) {
+        loadStatusAdapter.notifyItemRangeInserted(positionStart, itemCount);
+    }
+
+    @Override
+    public void notifyItemRemoved(int position) {
+        loadStatusAdapter.notifyItemRemoved(position);
+    }
+
+    @Override
+    public void notifyItemRangeRemoved(int positionStart, int itemCount) {
+        loadStatusAdapter.notifyItemRangeRemoved(positionStart, itemCount);
     }
 }

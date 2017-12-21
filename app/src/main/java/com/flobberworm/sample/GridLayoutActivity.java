@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.flobberworm.load.ItemClickSupport;
 import com.flobberworm.load.LoadStatusAdapter;
+import com.flobberworm.load.LoadViewHolder;
 import com.flobberworm.load.OnLoadMoreListener;
 import com.flobberworm.load.RecyclerManager;
 import com.flobberworm.sample.adapter.GridAdapter;
@@ -29,9 +30,8 @@ public class GridLayoutActivity extends AppCompatActivity implements SwipeRefres
     private SwipeRefreshLayout swipeRefreshLayout;
     private RecyclerView recyclerView;
     private List<String> dataList;
-    private LoadStatusAdapter loadStatusAdapter;
-
-    private GridLayoutManager gridLayoutManager;
+    private RecyclerManager recyclerManager;
+    private GridAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,15 +52,14 @@ public class GridLayoutActivity extends AppCompatActivity implements SwipeRefres
         swipeRefreshLayout.setOnRefreshListener(this);
         swipeRefreshLayout.setRefreshing(true);
 
-        GridAdapter adapter = new GridAdapter(this, dataList);
-        gridLayoutManager = new GridLayoutManager(this, 3);
-        RecyclerManager recyclerManager = new RecyclerManager(recyclerView);
+        adapter = new GridAdapter(this, dataList);
+        GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 3);
+
+        recyclerManager = new RecyclerManager(recyclerView);
         recyclerManager.setLayoutManager(gridLayoutManager);
-        recyclerManager.setLoadStatusAdapter(adapter);
+        recyclerManager.setAdapter(adapter);
         recyclerManager.setOnItemClickListener(this);
         recyclerManager.setOnLoadMoreListener(this);
-        loadStatusAdapter = recyclerManager.getLoadStatusAdapter();
-        loadStatusAdapter.setStatus(LoadStatusAdapter.Status.STATUS_LOADING);
     }
 
     @Override
@@ -89,10 +88,16 @@ public class GridLayoutActivity extends AppCompatActivity implements SwipeRefres
 
     @Override
     public void complete(List<String> data) {
+        if (swipeRefreshLayout.isRefreshing()) {
+            swipeRefreshLayout.setRefreshing(false);
+            dataList = new ArrayList<>();
+            adapter.setDataList(dataList);
+            recyclerManager.notifyDataSetChanged();
+        }
+
         int start = dataList.size();
         dataList.addAll(data);
-        loadStatusAdapter.notifyItemRangeInserted(start, data.size());
-
-        swipeRefreshLayout.setRefreshing(false);
+        recyclerManager.setStatus(LoadStatusAdapter.Status.STATUS_LOADING);
+        recyclerManager.notifyItemRangeInserted(start, data.size());
     }
 }

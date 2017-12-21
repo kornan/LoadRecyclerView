@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
 import com.flobberworm.sample.R;
-import com.flobberworm.sample.holder.LinearViewHolder;
+import com.flobberworm.sample.SampleBean;
 import com.flobberworm.sample.holder.StaggeredViewHolder;
 
 import java.util.List;
@@ -18,10 +18,14 @@ import java.util.List;
 
 public class StaggeredGridAdapter extends RecyclerView.Adapter<StaggeredViewHolder> {
     private LayoutInflater layoutInflater;
-    private List<String> dataList;
+    private List<SampleBean> dataList;
 
-    public StaggeredGridAdapter(Context context, List<String> dataList) {
+    public StaggeredGridAdapter(Context context, List<SampleBean> dataList) {
         this.layoutInflater = LayoutInflater.from(context);
+        this.dataList = dataList;
+    }
+
+    public void setDataList(List<SampleBean> dataList) {
         this.dataList = dataList;
     }
 

@@ -24,6 +24,10 @@ public class LinearAdapter extends RecyclerView.Adapter<LinearViewHolder> {
         this.dataList = dataList;
     }
 
+    public void setDataList(List<String> dataList) {
+        this.dataList = dataList;
+    }
+
     @Override
     public LinearViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new LinearViewHolder(layoutInflater.inflate(R.layout.item_linear_layout, parent, false));

@@ -11,7 +11,6 @@ import android.view.ViewGroup;
  * LoadMoreAdapter
  * Created by Kornan on 2017/11/23.
  */
-
 public class LoadStatusAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     public static final int ITEM_TYPE_LOAD_MORE = -1;
 
@@ -27,10 +26,15 @@ public class LoadStatusAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     private RecyclerView.Adapter adapter;
     private View loadMoreView;
     private int loadMoreLayoutId;
+    private LoadViewHolder loadViewHolder;
+
+    public void setLoadViewHolder(LoadViewHolder loadViewHolder) {
+        this.loadViewHolder = loadViewHolder;
+    }
 
     public LoadStatusAdapter(RecyclerView.Adapter adapter) {
         this.adapter = adapter;
-        loadMoreLayoutId = R.layout.item_refresh_bottom;
+        loadMoreLayoutId = R.layout.item_load_default_fw;
     }
 
     public LoadStatusAdapter(RecyclerView.Adapter adapter, View loadMoreView) {
@@ -88,23 +92,26 @@ public class LoadStatusAdapter extends RecyclerView.Adapter<RecyclerView.ViewHol
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == ITEM_TYPE_LOAD_MORE) {
-            View view;
-            if (loadMoreView != null) {
-                view = loadMoreView;
-            } else {
-                view = LayoutInflater.from(parent.getContext()).inflate(loadMoreLayoutId, parent, false);
+            if (loadViewHolder == null) {
+                View view;
+                if (loadMoreView != null) {
+                    view = loadMoreView;
+                } else {
+                    view = LayoutInflater.from(parent.getContext()).inflate(loadMoreLayoutId, parent, false);
+                }
+                loadViewHolder = new SimpleLoadViewHolder(view);
             }
-            return new LoadViewHolder(view);
+            return loadViewHolder;
+        } else {
+            return adapter.onCreateViewHolder(parent, viewType);
         }
-        return adapter.onCreateViewHolder(parent, viewType);
     }
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         if (position >= adapter.getItemCount()) {
-            LoadViewHolder loadViewHolder = (LoadViewHolder) holder;
-            loadViewHolder.setStatus(status);
-
+            LoadViewHolder loadHolder = (LoadViewHolder) holder;
+            loadHolder.setStatus(status);
             ViewGroup.LayoutParams layoutParams = holder.itemView.getLayoutParams();
             if (layoutParams instanceof StaggeredGridLayoutManager.LayoutParams) {
                 StaggeredGridLayoutManager.LayoutParams staggeredGridLayoutParams = (StaggeredGridLayoutManager.LayoutParams) layoutParams;
